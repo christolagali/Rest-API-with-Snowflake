@@ -34,6 +34,7 @@ def read_all():
 	
 	return [PEOPLE[key] for key in sorted(PEOPLE.keys())]
 
+
 def create(person):
 
     lname= person.get("lname", None)
@@ -53,13 +54,29 @@ def create(person):
         abort(406, "Person with last name {lname} already exists".format(lname=lname))
 
 
+def read_one(lname):
+    
+    if lname in PEOPLE:
+        return PEOPLE.get(lname)
+    else:
+        abort(404, "Person you were looking for {lname} is not to be found! ".format(lname=lname))
 
-def read_one():
-    pass
+
+def update(lname,person):
+    
+    if lname in PEOPLE:
+        PEOPLE[lname]["fname"] = person.get("fname")
+        PEOPLE[lname]["timestamp"] = get_timestamp()
+        
+        return PEOPLE[lname]
+    else:
+        abort(404,"Person with last name {lastname} not found".format(lastname=lname))
 
 
-def update():
-    pass
-
-def delete():
-    pass
+def delete(lname):
+    
+    
+    if lname in PEOPLE:
+        
+        del PEOPLE[lname]
+        return make_response("{lname} successfully deleted".format(lname=lname),200)
