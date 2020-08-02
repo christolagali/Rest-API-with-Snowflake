@@ -1,6 +1,13 @@
+from flask import(
+	render_template,
+    abort,
+    make_response
+)
 from datetime import datetime
+from people_class import people_list
+import json
 
-
+pclObj = people_list()
 def get_timestamp():
 	return datetime.now().strftime(("%Y-%m-%d %H:%M:%S"))
 
@@ -24,7 +31,7 @@ PEOPLE ={
         "timestamp": get_timestamp()
     }
 }
-
+    
 # creat the handler
 
 def read_all():
@@ -39,16 +46,12 @@ def create(person):
 
     lname= person.get("lname", None)
     fname = person.get("fname", None)
-
-    if lname not in PEOPLE and lname is not None:
-
-        PEOPLE[lname] = {
-            "lname" : lname,
-            "fname" : fname,
-            "timestamp" : get_timestamp()
-        }
-
-        return PEOPLE[lname],201
+    
+    (existingPerson,atIndex) = pclObj.searchPerson(lname)
+    
+    
+    if existingPerson == None:
+        pclObj.createPerson(lname,fname)
     
     else:
         abort(406, "Person with last name {lname} already exists".format(lname=lname))
@@ -56,27 +59,33 @@ def create(person):
 
 def read_one(lname):
     
-    if lname in PEOPLE:
-        return PEOPLE.get(lname)
+    (existingPerson,atIndex) = pclObj.searchPerson(lname)
+    
+    if existingPerson != None:
+        
+        #convert to JSON string
+        jsonStr = json.dumps(existingPerson.__dict__)
+        return jsonStr
     else:
         abort(404, "Person you were looking for {lname} is not to be found! ".format(lname=lname))
 
 
 def update(lname,person):
     
-    if lname in PEOPLE:
-        PEOPLE[lname]["fname"] = person.get("fname")
-        PEOPLE[lname]["timestamp"] = get_timestamp()
+    value = pclObj.updatePersonData(lname,person)
+    if value != None:
         
-        return PEOPLE[lname]
+        return make_response("{lname} successfully Updated".format(lname=value),200)
+    
     else:
-        abort(404,"Person with last name {lastname} not found".format(lastname=lname))
-
-
+        abort(404, "Person you were looking for {lname} is not to be found! ".format(lname=value))
+    
+        
+    
+    
 def delete(lname):
     
+    deletedPerson = pclObj.delPerson(lname)
     
-    if lname in PEOPLE:
-        
-        del PEOPLE[lname]
-        return make_response("{lname} successfully deleted".format(lname=lname),200)
+    if deletedPerson != None:
+        return make_response("{lname} successfully deleted".format(lname=deletedPerson.lname),200)
