@@ -35,11 +35,15 @@ PEOPLE ={
 # creat the handler
 
 def read_all():
-	
-	"""
-	"""
-	
-	return [PEOPLE[key] for key in sorted(PEOPLE.keys())]
+    peopleList = pclObj.getAllPeople()
+    
+    if peopleList != None:
+        json_string = json.dumps([ob.__dict__ for ob in peopleList])
+        return json_string
+    else:
+        abort(406, "There seems to be no one registered!")
+        
+    
 
 
 def create(person):
