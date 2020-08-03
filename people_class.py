@@ -75,6 +75,15 @@ class people_list:
         
         else:
             return None
+
+
+    def getAllPeople(self):
+        
+        if len(self.lst)>0:
+            return self.lst
+        
+        else:
+            return None
         
     
 
