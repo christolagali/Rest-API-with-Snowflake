@@ -8,6 +8,7 @@ Created on Sat Aug  1 20:40:16 2020
 # Class 
 
 from datetime import datetime
+from utils.db import Connect
 
 class people:
     
@@ -29,13 +30,27 @@ class people_list:
     def __init__(self):
         self.lst = []
         self.p = people()
+        self.connClass = Connect()
+        self.conn = None
 
     # create a new person
     def createPerson(self, lname,fname):
-        self.p = people()
-        self.p.setValues(lname,fname,datetime.now().strftime(("%Y-%m-%d %H:%M:%S")))
 
-        self.lst.append(self.p)
+
+        if self.conn ==None:
+            ### establish connection
+            self.conn = self.connClass.getSnowflakeConnection('christo77lagali','Snowflake@1234','xj19570.us-east-2.aws','ChOMPUTE_WH','DEMO_DB')
+            query = "INSERT INTO RAW_PEOPLE_INFO(LNAME,FNAME,TIMESTAMP) VALUES({lname},{fname},{timestamp})".format(
+                lname = lname,
+                fname = fname
+            )
+            self.connClass.execute_Query(query,self.conn)
+        
+        else:
+            self.p = people()
+            self.p.setValues(lname,fname,datetime.now().strftime(("%Y-%m-%d %H:%M:%S")))
+
+            self.lst.append(self.p)
 
         return self.lst
     
