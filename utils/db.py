@@ -14,18 +14,14 @@ class Connect:
     
 
     def getSnowflakeConnection(self,user,password,account,warehouse,dbname):
-
-        if self.snowflake_conn == None:
-            # establish connection
-            snowflake_conn = snowflake.connector.connect(
+        
+        snowflake_conn = snowflake.connector.connect(
                 user=user,
                 password=password,
                 account=account,
                 warehouse=warehouse,
                 database=dbname
                 )
-            
-        
         return snowflake_conn
     
     def execute_Query(self,query,conn):
