@@ -33,5 +33,6 @@ class Connect:
         try:
             conn.cursor.execute(query)
         
-        except:
+        except Exception as e:
             print(e)
+            
