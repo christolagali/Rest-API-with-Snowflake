@@ -47,7 +47,8 @@ class people_list:
                 fname = fname,
                 timestamp=ts
             )
-            self.connClass.execute_Query(query,self.conn)
+            #self.connClass.execute_Query(query,self.conn)
+            self.conn.cursor.execute(query)
         
         else:
             self.p = people()
