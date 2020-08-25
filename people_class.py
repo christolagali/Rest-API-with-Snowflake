@@ -40,9 +40,12 @@ class people_list:
         if self.conn ==None:
             ### establish connection
             self.conn = self.connClass.getSnowflakeConnection('christo77lagali','Snowflake@1234','xj19570.us-east-2.aws','ChOMPUTE_WH','DEMO_DB')
+
+            ts = '2020-08-24 22:13:07.902 -0700'
             query = "INSERT INTO RAW_PEOPLE_INFO(LNAME,FNAME,TIMESTAMP) VALUES({lname},{fname},{timestamp})".format(
                 lname = lname,
-                fname = fname
+                fname = fname,
+                timestamp=ts
             )
             self.connClass.execute_Query(query,self.conn)
         
