@@ -27,7 +27,7 @@ class Connect:
     def execute_Query(self,query,conn):
 
         try:
-            conn.cursor.execute(query)
+            conn.cursor().execute(query)
         
         except Exception as e:
             print(e)

@@ -39,16 +39,18 @@ class people_list:
 
         if self.conn ==None:
             ### establish connection
-            self.conn = self.connClass.getSnowflakeConnection('christo77lagali','Snowflake@1234','xj19570.us-east-2.aws','ChOMPUTE_WH','DEMO_DB')
+            self.conn = self.connClass.getSnowflakeConnection('christo77lagali','Snowflake@1234','xj19570.us-east-2.aws','COMPUTE_WH','DEMO_DB')
 
-            ts = '2020-08-24 22:13:07.902 -0700'
-            query = "INSERT INTO RAW_PEOPLE_INFO(LNAME,FNAME,TIMESTAMP) VALUES({lname},{fname},{timestamp})".format(
+            #ts = '2020-08-24 22:13:07.902 -0700'
+
+            lname = "'" + lname + "'"
+            fname = "'" + fname + "'"
+            query = "INSERT INTO RAW_PEOPLE_INFO(LNAME,FNAME,TIMESTAMP) VALUES({lname},{fname},current_timestamp())".format(
                 lname = lname,
-                fname = fname,
-                timestamp=ts
+                fname = fname
             )
-            #self.connClass.execute_Query(query,self.conn)
-            self.conn.cursor.execute(query)
+            self.connClass.execute_Query(query,self.conn)
+
         
         else:
             self.p = people()
