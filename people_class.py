@@ -9,6 +9,7 @@ Created on Sat Aug  1 20:40:16 2020
 
 from datetime import datetime
 from utils.db import Connect
+import json
 
 class people:
     
@@ -32,6 +33,7 @@ class people_list:
         self.p = people()
         self.connClass = Connect()
         self.conn = None
+        self.getAllPeople()
 
     # create a new person
     def createPerson(self, lname,fname):
@@ -39,24 +41,25 @@ class people_list:
 
         if self.conn ==None:
             ### establish connection
-            self.conn = self.connClass.getSnowflakeConnection('christo77lagali','Snowflake@1234','xj19570.us-east-2.aws','COMPUTE_WH','DEMO_DB')
+            self.conn = self.connClass.getSnowflakeConnection(configData['user'], configData['password'], configData['snow_account'], configData['warehouse'], configData['db'])
 
             #ts = '2020-08-24 22:13:07.902 -0700'
 
-            lname = "'" + lname + "'"
-            fname = "'" + fname + "'"
-            query = "INSERT INTO RAW_PEOPLE_INFO(LNAME,FNAME,TIMESTAMP) VALUES({lname},{fname},current_timestamp())".format(
-                lname = lname,
-                fname = fname
-            )
-            self.connClass.execute_Query(query,self.conn)
+        # Insert person to Database
+        lname = "'" + lname + "'"
+        fname = "'" + fname + "'"
+        query = "INSERT INTO RAW_PEOPLE_INFO(LNAME,FNAME,TIMESTAMP) VALUES({lname},{fname},current_timestamp())".format(
+            lname = lname,
+            fname = fname
+        )
+        self.connClass.execute_Query(query,self.conn)
 
-        
-        else:
-            self.p = people()
-            self.p.setValues(lname,fname,datetime.now().strftime(("%Y-%m-%d %H:%M:%S")))
+        # Add person to the local people list
+        self.p = people()
+        self.p.setValues(lname, fname, datetime.now().strftime(("%Y-%m-%d %H:%M:%S")))
 
-            self.lst.append(self.p)
+        self.lst.append(self.p)
+
 
         return self.lst
     
@@ -81,6 +84,13 @@ class people_list:
         if deletePerson!= None:
 
             del self.lst[atIndex]
+
+            # delete from the database
+            lname = "'" + lname + "'"
+            query = "DELETE FROM RAW_PEOPLE_INFO WHERE LNAME={lname}".format(
+                lname = lname
+            )
+            self.connClass.execute_Query(query, self.conn)
             return deletePerson
         
         else:
@@ -89,22 +99,51 @@ class people_list:
     def updatePersonData(self,lname,personObj):
         
         (foundPerson,atIndex) = self.searchPerson(lname)
-        
+
+        # Person to be updated already exists
         if foundPerson != None:
+            # Update the local list
             self.lst[atIndex].setValues(personObj.get("lname"),personObj.get("fname"),datetime.now().strftime(("%Y-%m-%d %H:%M:%S")) )
+
+            # update the database
+            lname = "'" + personObj.get("lname") + "'"
+            fname = "'" + personObj.get("fname") + "'"
+            query = "UPDATE RAW_PEOPLE_INFO SET FNAME ={fname} ,TIMESTAMP = CURRENT_TIMESTAMP() WHERE LNAME = {lname}".format(
+                fname=fname,
+                lname=lname
+            )
+            self.connClass.execute_Query(query, self.conn)
+
             return lname
         
         else:
             return None
 
-
+    # Method gets invoked on startup to establish connection with snowflake and populate the People List
     def getAllPeople(self):
         
         if len(self.lst)>0:
             return self.lst
         
         else:
-            return None
+
+            # read config from file
+            configData= None
+            with open('config/config.json') as f:
+                configData = json.load(f)
+
+            print(configData)
+
+            # Establish a connection
+            query = "SELECT LNAME,FNAME,TIMESTAMP FROM RAW_PEOPLE_INFO"
+            self.conn = self.connClass.getSnowflakeConnection(configData['user'], configData['password'], configData['snow_account'], configData['warehouse'], configData['db'])
+            curr = self.connClass.execute_Query(query, self.conn)
+
+            for row in curr:
+                self.p = people()
+                self.p.setValues( row[1],row[0], row[2])
+
+                self.lst.append(self.p)
         
     
 

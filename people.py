@@ -13,7 +13,7 @@ def get_timestamp():
 
 
     
-# creat the handler
+# create the handler
 
 def read_all():
     peopleList = pclObj.getAllPeople()

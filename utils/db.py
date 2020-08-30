@@ -27,7 +27,11 @@ class Connect:
     def execute_Query(self,query,conn):
 
         try:
-            conn.cursor().execute(query)
+            curr = conn.cursor()
+
+            curr.execute(query)
+
+            return curr
         
         except Exception as e:
             print(e)
